@@ -1,8 +1,11 @@
 package com.onesignal.flutter;
 
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.util.HashMap;
+
 
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
@@ -54,7 +57,12 @@ abstract class FlutterRegistrarResponder {
    }
 
    private void runOnMainThread(final Runnable runnable) {
-      ((Activity) flutterRegistrar.activeContext()).runOnUiThread(runnable);
+      if (Looper.getMainLooper().getThread() == Thread.currentThread())
+         runnable.run();
+      else {
+         Handler handler = new Handler(Looper.getMainLooper());
+         handler.post(runnable);
+      }
    }
 
    void invokeMethodOnUiThread(final String methodName, final HashMap map) {
